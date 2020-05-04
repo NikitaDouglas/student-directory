@@ -18,11 +18,9 @@ def print_header
         "-----------"
 end
 
-def print(students, letter)
+def print(students)
   students.each do |student|
-    if student[:name][0] == letter.upcase
       puts "#{student[:name]} (#{student[:cohort]} cohort)"
-    end
   end
 end
 
@@ -47,5 +45,5 @@ end
 #nothing happens until we call the methods
 students = input_students
 print_header
-print(students, "a")
+print(students)
 print_footer(students)
