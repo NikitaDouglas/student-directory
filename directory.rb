@@ -1,77 +1,103 @@
+require 'csv'
+
 @students = [] # an empty array accessible to all methods
+
+
+#show_students methods
+
+def show_students
+  print_header
+  print_students_list
+  print_footer
+end
 
 def print_header
    puts "\nThe students of Villains Academy",
         "-----------"
 end
 
-def print_students_list(students)
+def print_students_list
   @students.each do |student|
       puts "#{student[:name]} (#{student[:cohort]} cohort)"
   end
 end
 
-def print_footer(students)
-  puts "Overall we have #{@students.count} great students."
+def print_footer
+  puts "\nOverall we have #{@students.count} great students."
 end
 
+#input students
 def input_students
-  puts "Please enter the names of the students",
+  puts "\nPlease enter the names of the students.",
         "To finish, just hit return twice."
-  name = gets.chomp
 
-  while !name.empty? do
-    @students << {name: name, cohort: :November}
-    puts "Now we have #{@students.count}"
+  loop  do
     name = STDIN.gets.chomp
+    break if name.empty?
+    add_student(name, "November")
+    puts "Now we have #{@students.count}"
   end
 end
 
+def add_student(name, cohort)
+  @students << {name: name, cohort: cohort.to_sym}
+end
+
+#add students
 def save_students
-  # open the file for writing
-  file = File.open("students.csv", "w")
-  # iterate over the array of students
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
+  CSV.open(@filename, "w") do |file|
+    @students.each do |student|
+      file << ([student[:name], student[:cohort]])
+    end
   end
-  file.close
+  puts "\nStudents saved to #{@filename}."
 end
 
-def load_students(filename = "students.csv")
-  file = File.open("students.csv", "r")
-  file.readlines.each do |line|
-    name, cohort = line.chomp.split(",")
-      @students << {name: name, cohort: cohort.to_sym}
+#load students
+def load_students
+  CSV.open(@filename, "r") do |file|
+    file.each do |line|
+      name, cohort = line
+      add_student(name, cohort)
     end
-  file.close
+  end
+  puts "Loaded #{@students.count} from #{@filename}."
 end
 
 def try_load_students
-  filename = ARGV.first
-  return if filename.nil?
-  if File.exists?(filename)
-    load_students(filename)
-      puts "Loaded #{@students.count} from #{filename}"
+  @filename = ARGV.first
+  if @filename.nil?
+    @filename = "students.csv"
+  end
+
+  if File.exists?(@filename)
+    load_students()
   else
-    puts "Sorry #{filename} doesn't exist."
+    puts "Sorry #{@filename} doesn't exist."
     exit
   end
 end
 
+#menu
 def print_menu
   puts "\n1. Input the students.",
        "2. Show the students.",
-       "3. Save the list to students.csv",
-       "4. Load the list from students.csv",
+       "3. Save the list to students.csv.",
+       "4. Load the students from students.csv",
        "9. Exit."
 end
 
-def show_students
-  print_header
-  print_students_list(@students)
-  print_footer(@students)
+
+def choose_file(use)
+  puts "\nPlease enter the name of the file you'd like to #{use}.",
+       "The default file is students.csv.",
+       "If you'd like to use the default, just hit return twice."
+  file = STDIN.gets.chomp
+    if !file.empty?
+      @filename = file
+    else
+      @filename = "students.csv"
+    end
 end
 
 def process(selection)
@@ -81,10 +107,17 @@ def process(selection)
     when "2"
       show_students
     when "3"
+      choose_file("save")
       save_students
     when "4"
-      load_students
+      choose_file("load")
+        if @filename == "students.csv"
+          puts "\nThe file #{@filename} is already loaded."
+        else
+          load_students
+        end
     when "9"
+      puts "\nThanks for using the Student Directory - bye!\n"
       exit
     else
       puts "\nI don't know what you mean, please try again."
