@@ -6,23 +6,23 @@ require 'csv'
 #show_students methods
 
 def show_students
-  print_header
-  print_students_list
-  print_footer
+  show_students_header
+  show_students_list
+  show_students_footer
 end
 
-def print_header
+def show_students_header
    puts "\nThe students of Villains Academy",
         "-----------"
 end
 
-def print_students_list
+def show_students_list
   @students.each do |student|
       puts "#{student[:name]} (#{student[:cohort]} cohort)"
   end
 end
 
-def print_footer
+def show_students_footer
   puts "\nOverall we have #{@students.count} great students."
 end
 
@@ -54,7 +54,7 @@ def save_students
 end
 
 #load students
-def load_students
+def load_file
   CSV.open(@filename, "r") do |file|
     file.each do |line|
       name, cohort = line
@@ -64,21 +64,19 @@ def load_students
   puts "Loaded #{@students.count} from #{@filename}."
 end
 
-def try_load_students
+def try_load_file
   @filename = ARGV.first
   if @filename.nil?
     @filename = "students.csv"
   end
 
   if File.exists?(@filename)
-    load_students()
+    load_file()
   else
     puts "Sorry #{@filename} doesn't exist."
-    exit
   end
 end
 
-#menu
 def print_menu
   puts "\n1. Input the students.",
        "2. Show the students.",
@@ -86,7 +84,6 @@ def print_menu
        "4. Load the students from students.csv",
        "9. Exit."
 end
-
 
 def choose_file(use)
   puts "\nPlease enter the name of the file you'd like to #{use}.",
@@ -100,7 +97,8 @@ def choose_file(use)
     end
 end
 
-def process(selection)
+
+def pick_option(selection)
   case selection
     when "1"
       input_students
@@ -114,7 +112,7 @@ def process(selection)
         if @filename == "students.csv"
           puts "\nThe file #{@filename} is already loaded."
         else
-          load_students
+          load_file
         end
     when "9"
       puts "\nThanks for using the Student Directory - bye!\n"
@@ -124,10 +122,11 @@ def process(selection)
   end
 end
 
+#menu
 def interactive_menu
   loop do
     print_menu
-    process(STDIN.gets.chomp)
+    pick_option(STDIN.gets.chomp)
   end
 end
 
